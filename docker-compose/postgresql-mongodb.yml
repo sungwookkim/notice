@@ -1,0 +1,18 @@
+version: "3"
+services:
+  pg15:
+    image: postgres:15-alpine
+    command: postgres --max_prepared_transactions=10
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5445:5432"
+  mongodb:
+    image: mongo:4.4.26
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=1234
+      - MONGO_INITDB_DATABASE=mydb
+    ports:
+      - "27017:27017"
