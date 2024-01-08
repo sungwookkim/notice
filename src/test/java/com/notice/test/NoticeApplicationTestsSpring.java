@@ -1,6 +1,7 @@
 package com.notice.test;
 
 import com.notice.common.file.FileUpload;
+import com.notice.common.file.LocalFileUploadImpl;
 import com.notice.common.file.entity.UploadInfo;
 import com.notice.domain.Notice;
 import com.notice.domain.NoticeFileAttach;
@@ -54,7 +55,7 @@ class NoticeApplicationTestsSpring {
 				, LocalDateTime.now())
 			.newNoticeInstance();
 
-		this.noticeServiceDecoratorImpl.save(saveNotice);
+		this.noticeServiceDecoratorImpl.save(saveNotice, new ArrayList<>());
 
 		Optional<NoticeVo> findNotice = this.noticeServiceDecoratorImpl.findById(saveNotice.getNoticeId());
 
@@ -77,7 +78,7 @@ class NoticeApplicationTestsSpring {
 				, LocalDateTime.now())
 			.newNoticeInstance();
 
-		this.noticeServiceDecoratorImpl.save(saveNotice);
+		this.noticeServiceDecoratorImpl.save(saveNotice, new ArrayList<>());
 
 		ReqNoticeUpdateDto reqNoticeUpdateDto = new ReqNoticeUpdateDto(saveNotice.getNoticeId()
 				, "title_update"
@@ -85,15 +86,15 @@ class NoticeApplicationTestsSpring {
 				, LocalDateTime.now()
 				, LocalDateTime.now());
 		Notice updateNotice = reqNoticeUpdateDto.newNoticeInstance();
-		Long seq = saveNotice.getNoticeId();
+		Long noticeId = saveNotice.getNoticeId();
 
-		this.noticeServiceDecoratorImpl.update(seq, updateNotice);
+		this.noticeServiceDecoratorImpl.update(noticeId, updateNotice, new ArrayList<>(), TestLocalFileUploadImpl.fileDelete);
 
-		Optional<NoticeVo> findNoticePg = this.noticeServicePgImpl.findById(seq);
-		Optional<NoticeVo> findNoticeMongoDB = this.noticeServiceMongoDBImpl.findById(seq);
+		Optional<NoticeVo> findNoticePg = this.noticeServicePgImpl.findById(noticeId);
+		Optional<NoticeVo> findNoticeMongoDB = this.noticeServiceMongoDBImpl.findById(noticeId);
 
 		logger.info("seq : {}, updateNotice Title : {} [PG] findNotice Title : {}  [MongoDB] findNotice Title :{}"
-				, seq
+				, noticeId
 				, updateNotice.getTitle()
 				, findNoticePg.get().getTitle()
 				, findNoticeMongoDB.get().getTitle());
@@ -112,7 +113,7 @@ class NoticeApplicationTestsSpring {
 				, LocalDateTime.now())
 			.newNoticeInstance();
 
-		this.noticeServiceDecoratorImpl.save(saveNotice);
+		this.noticeServiceDecoratorImpl.save(saveNotice, new ArrayList<>());
 		this.noticeServiceDecoratorImpl.delete(saveNotice.getNoticeId());
 
 		Optional<NoticeVo> findNoticePg = this.noticeServicePgImpl.findById(saveNotice.getNoticeId());
@@ -161,7 +162,7 @@ class NoticeApplicationTestsSpring {
 				, "regId"
 				, LocalDateTime.now()
 				, LocalDateTime.now())
-				.newNoticeInstance();
+			.newNoticeInstance();
 
 		List<File> files = new ArrayList<>();
 		List<FileUpload> fileUploads = new ArrayList<>();
@@ -195,15 +196,12 @@ class NoticeApplicationTestsSpring {
 		List<File> files = Arrays.asList(new File("src/test/resources/file/upload_1.txt")
 				, new File("src/test/resources/file/upload_2.txt"));
 
+		List<FileUpload> fileUploads = new ArrayList<>();
 		for(File file : files) {
-			UploadInfo uploadInfo = new TestLocalFileUploadImpl(file).upload();
-
-			saveNotice.addNoticeFileAttach(new NoticeFileAttach(uploadInfo.originalFileName()
-					, uploadInfo.uploadFileName()
-					, uploadInfo.uploadPath()));
+			fileUploads.add(new TestLocalFileUploadImpl(file));
 		}
 
-		this.noticeServiceDecoratorImpl.save(saveNotice);
+		this.noticeServiceDecoratorImpl.save(saveNotice, fileUploads);
 		this.noticeServiceDecoratorImpl.delete(saveNotice.getNoticeId());
 
 		Optional<NoticeVo> findNoticePg = this.noticeServicePgImpl.findById(saveNotice.getNoticeId());
@@ -225,15 +223,12 @@ class NoticeApplicationTestsSpring {
 
 		List<File> saveFiles = Arrays.asList(new File("src/test/resources/file/upload_1.txt"));
 
+		List<FileUpload> saveFileUploads = new ArrayList<>();
 		for(File file : saveFiles) {
-			UploadInfo uploadInfo = new TestLocalFileUploadImpl(file).upload();
-
-			saveNotice.addNoticeFileAttach(new NoticeFileAttach(uploadInfo.originalFileName()
-					, uploadInfo.uploadFileName()
-					, uploadInfo.uploadPath()));
+			saveFileUploads.add(new TestLocalFileUploadImpl(file));
 		}
 
-		this.noticeServiceDecoratorImpl.save(saveNotice);
+		this.noticeServiceDecoratorImpl.save(saveNotice, saveFileUploads);
 
 		Notice updateNotice = new ReqNoticeSaveDto("title_update"
 				, "contents_update"
@@ -276,7 +271,7 @@ class NoticeApplicationTestsSpring {
 				, LocalDateTime.now())
 			.newNoticeInstance();
 
-		this.noticeServiceDecoratorImpl.save(saveNotice);
+		this.noticeServiceDecoratorImpl.save(saveNotice, new ArrayList<>());
 
 		Notice updateNotice = new ReqNoticeSaveDto("title_update"
 				, "contents_update"
@@ -321,22 +316,19 @@ class NoticeApplicationTestsSpring {
 
 		List<File> saveFiles = Arrays.asList(new File("src/test/resources/file/upload_1.txt"));
 
+		List<FileUpload> fileUploads = new ArrayList<>();
 		for(File file : saveFiles) {
-			UploadInfo uploadInfo = new TestLocalFileUploadImpl(file).upload();
-
-			saveNotice.addNoticeFileAttach(new NoticeFileAttach(uploadInfo.originalFileName()
-					, uploadInfo.uploadFileName()
-					, uploadInfo.uploadPath()));
+			fileUploads.add(new TestLocalFileUploadImpl(file));
 		}
 
-		this.noticeServiceDecoratorImpl.save(saveNotice);
+		this.noticeServiceDecoratorImpl.save(saveNotice, fileUploads);
 
 		Notice updateNotice = new ReqNoticeSaveDto("title_update"
 				, "contents_update"
 				, "regId_update"
 				, LocalDateTime.now()
 				, LocalDateTime.now())
-				.newNoticeInstance();
+			.newNoticeInstance();
 
 		this.noticeServiceDecoratorImpl.update(saveNotice.getNoticeId()
 				, updateNotice

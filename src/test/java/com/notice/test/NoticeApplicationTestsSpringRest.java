@@ -108,7 +108,7 @@ class NoticeApplicationTestsSpringRest {
 	@Test
 	@DisplayName("[GET] /v1/notice - 조회 가능한 게시물")
 	void testCase3() throws Exception {
-		String noticeId = "96";
+		String noticeId = "16";
 
 		mockMvc.perform(get("/v1/notice/" + noticeId))
 				.andExpect(status().isOk())
@@ -136,7 +136,7 @@ class NoticeApplicationTestsSpringRest {
 	@Test
 	@DisplayName("[DELETE] /v1/notice - 조회 가능한 게시물")
 	void testCase5() throws Exception {
-		String noticeId = "85";
+		String noticeId = "16";
 
 		mockMvc.perform(delete("/v1/notice/" + noticeId))
 				.andExpect(status().isOk())
@@ -186,9 +186,9 @@ class NoticeApplicationTestsSpringRest {
 	선행으로 실행 후 noticeId를 활용 해야 함.
 	 */
 	@Test
-	@DisplayName("[PUT] /v1/notice")
+	@DisplayName("[PUT] /v1/notice - 파일 첨부")
 	void testCase9() throws Exception {
-		Long noticeId = 3L;
+		Long noticeId = 17L;
 
 		ReqNoticeUpdateDto reqNoticeUpdateDto = new ReqNoticeUpdateDto(noticeId
 				, "title_update"
@@ -215,6 +215,34 @@ class NoticeApplicationTestsSpringRest {
 		mockMvc.perform(multipart("/v1/notice")
 						.file(file1)
 						.file(file2)
+						.file(noticeUpdateDto)
+						.file(method))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("httpStatus.code").value(HttpStatus.OK.value()))
+				.andExpect(jsonPath("processCode").value(ProcessCode.Common.SUCCESS.getCode()))
+				.andDo(print());
+	}
+
+	@Test
+	@DisplayName("[PUT] /v1/notice - 파일 미첨부")
+	void testCase10() throws Exception {
+		Long noticeId = 17L;
+
+		ReqNoticeUpdateDto reqNoticeUpdateDto = new ReqNoticeUpdateDto(noticeId
+				, "title_update"
+				, "contents_update"
+				, LocalDateTime.now()
+				, LocalDateTime.now().plusDays(1));
+		MockMultipartFile noticeUpdateDto = new MockMultipartFile("noticeInfo"
+				, null
+				, "plain/text"
+				, JsonHelper.Singleton.getInstance().getObjectMapper().writeValueAsString(reqNoticeUpdateDto).getBytes());
+		MockMultipartFile method = new MockMultipartFile("method"
+				, null
+				, "plain/text"
+				, "put".getBytes());
+
+		mockMvc.perform(multipart("/v1/notice")
 						.file(noticeUpdateDto)
 						.file(method))
 				.andExpect(status().isOk())
